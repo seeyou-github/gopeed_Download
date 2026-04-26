@@ -68,7 +68,7 @@ void _foregroundTaskStartCallback() {
 
 class _GopeedForegroundTaskHandler extends TaskHandler {
   @override
-  Future<void> onStart(DateTime timestamp, TaskStarter starter) async {}
+  void onStart(DateTime timestamp) {}
 
   @override
   void onRepeatEvent(DateTime timestamp) {}
@@ -163,7 +163,7 @@ class AppController extends GetxController with WindowListener, TrayListener {
     LibgopeedBoot.instance.stop();
   }
 
-  void _onForegroundTaskData(Object data) {
+  void _onForegroundTaskData(dynamic data) {
     if (data is! Map) {
       return;
     }
