@@ -164,24 +164,19 @@ class HomeView extends GetView<HomeController> {
         return scaffold;
       }
 
-      return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) async {
-          if (didPop) {
-            return;
-          }
-
+      return WillPopScope(
+        onWillPop: () async {
           final currentPath = currentRoute?.uri.path ?? Routes.TASK;
           if (currentPath != Routes.TASK &&
               currentPath != Routes.EXTENSION &&
               currentPath != Routes.SETTING) {
             await Get.rootDelegate.popRoute();
-            return;
+            return false;
           }
 
           if (controller.shouldExitOnBack()) {
             await Get.find<AppController>().exitApp();
-            return;
+            return false;
           }
 
           Get.closeCurrentSnackbar();
@@ -193,6 +188,7 @@ class HomeView extends GetView<HomeController> {
             borderRadius: 8,
             duration: const Duration(seconds: 2),
           );
+          return false;
         },
         child: scaffold,
       );
