@@ -174,20 +174,7 @@ class HomeView extends GetView<HomeController> {
             return false;
           }
 
-          if (controller.shouldExitOnBack()) {
-            await Get.find<AppController>().exitApp();
-            return false;
-          }
-
-          Get.closeCurrentSnackbar();
-          Get.rawSnackbar(
-            titleText: const SizedBox.shrink(),
-            messageText: Text('pressBackAgainToExit'.tr),
-            snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.all(12),
-            borderRadius: 8,
-            duration: const Duration(seconds: 2),
-          );
+          await Get.find<AppController>().exitApp();
           return false;
         },
         child: scaffold,
