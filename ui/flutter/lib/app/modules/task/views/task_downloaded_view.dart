@@ -10,6 +10,9 @@ class TaskDownloadedView extends GetView<TaskDownloadedController> {
   @override
   Widget build(BuildContext context) {
     return BuildTaskListView(
-        tasks: controller.tasks, selectedTaskIds: controller.selectedTaskIds);
+      tasks: controller.tasks,
+      selectedTaskIds: controller.selectedTaskIds,
+      taskListController: controller,
+    );
   }
 }

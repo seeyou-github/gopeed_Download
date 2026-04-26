@@ -8,11 +8,9 @@ import '../../../../util/file_explorer.dart';
 import '../../../../util/util.dart';
 import '../../../routes/app_pages.dart';
 import '../../../views/copy_button.dart';
+import '../../../views/buid_task_list_view.dart';
+import '../controllers/task_all_controller.dart';
 import '../controllers/task_controller.dart';
-import '../controllers/task_downloaded_controller.dart';
-import '../controllers/task_downloading_controller.dart';
-import 'task_downloaded_view.dart';
-import 'task_downloading_view.dart';
 
 class TaskView extends GetView<TaskController> {
   const TaskView({Key? key}) : super(key: key);
@@ -28,51 +26,16 @@ class TaskView extends GetView<TaskController> {
   @override
   Widget build(BuildContext context) {
     final selectTask = controller.selectTask;
+    final taskAllController = Get.find<TaskAllController>();
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        key: controller.scaffoldKey,
-        appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(56),
-            child: AppBar(
-              bottom: TabBar(
-                tabs: const [
-                  Tab(
-                    icon: Icon(Icons.file_download),
-                  ),
-                  Tab(
-                    icon: Icon(Icons.done),
-                  ),
-                ],
-                onTap: (index) {
-                  if (controller.tabIndex.value != index) {
-                    controller.tabIndex.value = index;
-                    final downloadingController =
-                        Get.find<TaskDownloadingController>();
-                    final downloadedController =
-                        Get.find<TaskDownloadedController>();
-                    switch (index) {
-                      case 0:
-                        downloadingController.start();
-                        downloadedController.stop();
-                        break;
-                      case 1:
-                        downloadingController.stop();
-                        downloadedController.start();
-                        break;
-                    }
-                  }
-                },
-              ),
-            )),
-        body: const TabBarView(
-          children: [
-            TaskDownloadingView(),
-            TaskDownloadedView(),
-          ],
-        ),
-        endDrawer: Drawer(
+    return Scaffold(
+      key: controller.scaffoldKey,
+      body: BuildTaskListView(
+        tasks: taskAllController.tasks,
+        selectedTaskIds: taskAllController.selectedTaskIds,
+        taskListController: taskAllController,
+      ),
+      endDrawer: Drawer(
           // Add a ListView to the drawer. This ensures the user can scroll
           // through the options in the drawer if there isn't enough vertical
           // space to fit everything.
@@ -109,7 +72,6 @@ class TaskView extends GetView<TaskController> {
                   ),
                 ],
               )),
-        ),
       ),
     );
   }

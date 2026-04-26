@@ -11,8 +11,7 @@ import '../../util/message.dart';
 import '../../util/util.dart';
 import '../modules/app/controllers/app_controller.dart';
 import '../modules/task/controllers/task_controller.dart';
-import '../modules/task/controllers/task_downloaded_controller.dart';
-import '../modules/task/controllers/task_downloading_controller.dart';
+import '../modules/task/controllers/task_list_controller.dart';
 import '../modules/task/views/task_view.dart';
 import '../routes/app_pages.dart';
 import 'file_icon.dart';
@@ -20,11 +19,13 @@ import 'file_icon.dart';
 class BuildTaskListView extends GetView {
   final List<Task> tasks;
   final List<String> selectedTaskIds;
+  final TaskListController taskListController;
 
   const BuildTaskListView({
     Key? key,
     required this.tasks,
     required this.selectedTaskIds,
+    required this.taskListController,
   }) : super(key: key);
 
   @override
@@ -55,6 +56,8 @@ class BuildTaskListView extends GetView {
   }
 
   Widget item(BuildContext context, Task task) {
+    final theme = Theme.of(context);
+
     bool isDone() {
       return task.status == Status.done;
     }
@@ -69,6 +72,17 @@ class BuildTaskListView extends GetView {
 
     bool isFolderTask() {
       return task.isFolder;
+    }
+
+    Color? dimmedColor(Color? baseColor, {double factor = 0.55}) {
+      if (!isDone()) {
+        return baseColor;
+      }
+      final fallback = theme.disabledColor;
+      if (baseColor == null) {
+        return fallback;
+      }
+      return Color.lerp(baseColor, fallback, factor);
     }
 
     Future<void> showDeleteDialog(List<String> ids) {
@@ -398,9 +412,6 @@ class BuildTaskListView extends GetView {
 
     final appController = Get.find<AppController>();
     final taskController = Get.find<TaskController>();
-    final taskListController = taskController.tabIndex.value == 0
-        ? Get.find<TaskDownloadingController>()
-        : Get.find<TaskDownloadedController>();
 
     // Filter selected task ids that are still in the task list
     filterSelectedTaskIds(Iterable<String> selectedTaskIds) => selectedTaskIds
@@ -543,7 +554,17 @@ class BuildTaskListView extends GetView {
                   ListTile(
                       title: Row(
                         children: [
-                          Expanded(child: Text(task.name)),
+                          Expanded(
+                            child: Text(
+                              task.name,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: dimmedColor(
+                                  theme.textTheme.titleMedium?.color,
+                                  factor: 0.75,
+                                ),
+                              ),
+                            ),
+                          ),
                           // Show pending update indicator
                           if (appController.pendingUpdateTask.value?.id ==
                               task.id)
@@ -573,8 +594,9 @@ class BuildTaskListView extends GetView {
                           Flexible(
                             child: Text(
                               getProgressText(),
-                              style: Get.textTheme.bodyLarge
-                                  ?.copyWith(color: Get.theme.disabledColor),
+                              style: Get.textTheme.bodyLarge?.copyWith(
+                                color: dimmedColor(Get.theme.disabledColor),
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -584,8 +606,9 @@ class BuildTaskListView extends GetView {
                             const SizedBox(width: 4),
                             Text(
                               getPercentText(),
-                              style: Get.textTheme.bodyLarge
-                                  ?.copyWith(color: Get.theme.disabledColor),
+                              style: Get.textTheme.bodyLarge?.copyWith(
+                                color: dimmedColor(Get.theme.disabledColor),
+                              ),
                             ),
                           ],
                         ],
@@ -598,7 +621,11 @@ class BuildTaskListView extends GetView {
                           if (!Util.isMobile() && getEtaText().isNotEmpty) ...[
                             Text(
                               getEtaText(),
-                              style: Get.textTheme.titleSmall,
+                              style: Get.textTheme.titleSmall?.copyWith(
+                                color: dimmedColor(
+                                  Get.textTheme.titleSmall?.color,
+                                ),
+                              ),
                             ),
                             Text(
                               " | ",
@@ -609,7 +636,11 @@ class BuildTaskListView extends GetView {
                             ).padding(horizontal: 4),
                           ],
                           Text("${Util.fmtByte(task.progress.speed)}/s",
-                              style: Get.textTheme.titleSmall),
+                              style: Get.textTheme.titleSmall?.copyWith(
+                                color: dimmedColor(
+                                  Get.textTheme.titleSmall?.color,
+                                ),
+                              )),
                           ...buildActions()
                         ],
                       ),
