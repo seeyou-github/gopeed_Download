@@ -2,6 +2,7 @@ const ruRU = {
   'ru_RU': {
     'label': 'Русский',
     'error': 'Ошибка',
+    'success': 'Success',
     'tip': 'Подсказка',
     'confirm': 'Подтвердить',
     'confirmDelete': 'Вы уверены, что хотите удалить?',

@@ -2,6 +2,7 @@ const plPL = {
   'pl_PL': {
     'label': 'Polski',
     'error': 'Błąd',
+    'success': 'Success',
     'tip': 'Tip',
     'confirm': 'Potwierdź',
     'confirmDelete': 'Czy na pewno chcesz usunąć?',

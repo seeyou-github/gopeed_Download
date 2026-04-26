@@ -2,6 +2,7 @@ const enUS = {
   'en_US': {
     'label': 'English',
     'error': 'Error',
+    'success': 'Success',
     'tip': 'Tip',
     'confirm': 'Confirm',
     'confirmDelete': 'Are you sure you want to delete?',

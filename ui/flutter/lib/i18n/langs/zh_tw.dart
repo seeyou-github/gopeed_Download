@@ -2,6 +2,7 @@ const zhTW = {
   "zh_TW": {
     'label': '中文 (正體)',
     'error': '錯誤',
+    'success': '成功',
     'tip': '提示',
     'confirm': '確認',
     'confirmDelete': '確定要刪除嗎？',

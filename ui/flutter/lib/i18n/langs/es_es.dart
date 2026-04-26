@@ -2,6 +2,7 @@ const esES = {
   'es_ES': {
     'label': 'Español',
     'error': 'Error',
+    'success': 'Success',
     'tip': 'Consejo',
     'confirm': 'Confirmar',
     'confirmDelete': '¿Está seguro de que desea eliminar?',

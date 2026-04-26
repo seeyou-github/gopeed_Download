@@ -2,6 +2,7 @@ const trTR = {
   'tr_TR': {
     'label': 'Türkçe',
     'error': 'Hata',
+    'success': 'Success',
     'tip': 'İpucu',
     'confirm': 'Onayla',
     'confirmDelete': 'Silmek istediğinize emin misiniz?',

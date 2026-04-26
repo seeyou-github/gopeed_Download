@@ -2,6 +2,7 @@ const deDE = {
   'de_DE': {
     'label': 'Deutsch',
     'error': 'Fehler',
+    'success': 'Success',
     'tip': 'Tipp',
     'confirm': 'Bestätigen',
     'confirmDelete': 'Möchten Sie wirklich löschen?',

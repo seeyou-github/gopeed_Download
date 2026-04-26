@@ -2,6 +2,7 @@ const faIR = {
   "fa_IR": {
     'label': 'فارسی',
     'error': 'اررور',
+    'success': 'Success',
     'tip': 'Tip',
     'confirm': 'تایید',
     'confirmDelete': 'آیا مطمئن هستید که می خواهید حذف کنید؟',

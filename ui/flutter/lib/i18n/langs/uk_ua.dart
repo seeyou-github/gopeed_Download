@@ -2,6 +2,7 @@ const ukUA = {
   'uk_UA': {
     'label': 'Мова',
     'error': 'Помилка',
+    'success': 'Success',
     'tip': 'Підказка',
     'confirm': 'Підтвердити',
     'confirmDelete': 'Ви впевнені, що хочете видалити?',

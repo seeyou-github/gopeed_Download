@@ -2,6 +2,7 @@ const caES = {
   'ca_ES': {
     'label': 'Català',
     'error': 'Error',
+    'success': 'Success',
     'tip': 'Consell',
     'confirm': 'Confirma',
     'confirmDelete': 'Esteu segur que voleu suprimir-lo?',

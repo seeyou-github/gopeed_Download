@@ -2,6 +2,7 @@ const itIT = {
   'it_IT': {
     'label': 'Italiano',
     'error': 'Errore',
+    'success': 'Success',
     'tip': 'Suggerimento',
     'confirm': 'Conferma',
     'confirmDelete': 'Sei sicuro di voler eliminare?',

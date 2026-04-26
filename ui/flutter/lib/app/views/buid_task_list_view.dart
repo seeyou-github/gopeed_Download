@@ -410,6 +410,36 @@ class BuildTaskListView extends GetView {
       }
     }
 
+    bool showLiveMetrics() {
+      return task.status == Status.running;
+    }
+
+    String? getStatusText() {
+      switch (task.status) {
+        case Status.done:
+          return 'success'.tr;
+        case Status.error:
+          return 'error'.tr;
+        case Status.pause:
+          return 'pause'.tr;
+        default:
+          return null;
+      }
+    }
+
+    Color? getStatusColor() {
+      switch (task.status) {
+        case Status.done:
+          return Colors.green;
+        case Status.error:
+          return Colors.red;
+        case Status.pause:
+          return dimmedColor(Get.textTheme.titleSmall?.color, factor: 0.35);
+        default:
+          return null;
+      }
+    }
+
     final appController = Get.find<AppController>();
     final taskController = Get.find<TaskController>();
 
@@ -617,30 +647,46 @@ class BuildTaskListView extends GetView {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Only show ETA on wider screens
-                          if (!Util.isMobile() && getEtaText().isNotEmpty) ...[
+                          if (getStatusText() != null)
                             Text(
-                              getEtaText(),
+                              getStatusText()!,
+                              style: Get.textTheme.titleSmall?.copyWith(
+                                color: getStatusColor(),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          else ...[
+                            // Only show ETA on wider screens
+                            if (!Util.isMobile() &&
+                                showLiveMetrics() &&
+                                getEtaText().isNotEmpty) ...[
+                              Text(
+                                getEtaText(),
+                                style: Get.textTheme.titleSmall?.copyWith(
+                                  color: dimmedColor(
+                                    Get.textTheme.titleSmall?.color,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                " | ",
+                                style: Get.textTheme.titleSmall?.copyWith(
+                                  color: Get.theme.disabledColor,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                              ).padding(horizontal: 4),
+                            ],
+                            Text(
+                              showLiveMetrics()
+                                  ? "${Util.fmtByte(task.progress.speed)}/s"
+                                  : "",
                               style: Get.textTheme.titleSmall?.copyWith(
                                 color: dimmedColor(
                                   Get.textTheme.titleSmall?.color,
                                 ),
                               ),
                             ),
-                            Text(
-                              " | ",
-                              style: Get.textTheme.titleSmall?.copyWith(
-                                color: Get.theme.disabledColor,
-                                fontWeight: FontWeight.w300,
-                              ),
-                            ).padding(horizontal: 4),
                           ],
-                          Text("${Util.fmtByte(task.progress.speed)}/s",
-                              style: Get.textTheme.titleSmall?.copyWith(
-                                color: dimmedColor(
-                                  Get.textTheme.titleSmall?.color,
-                                ),
-                              )),
                           ...buildActions()
                         ],
                       ),

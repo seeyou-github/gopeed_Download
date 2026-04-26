@@ -2,6 +2,7 @@ const zhCN = {
   'zh_CN': {
     'label': '中文（简体）',
     'error': '错误',
+    'success': '成功',
     'tip': '提示',
     'confirm': '确认',
     'confirmDelete': '确定要删除吗？',

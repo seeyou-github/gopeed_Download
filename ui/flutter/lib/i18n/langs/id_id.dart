@@ -2,6 +2,7 @@ const idID = {
   'id_ID': {
     'label': 'Indonesia',
     'error': 'Kesalahan',
+    'success': 'Success',
     'tip': 'Tips',
     'confirm': 'Konfirmasi',
     'confirmDelete': 'Apakah Anda yakin ingin menghapus?',

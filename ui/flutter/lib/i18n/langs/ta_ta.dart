@@ -2,6 +2,7 @@ const taTA = {
   'ta_TA': {
     'label': 'தமிழ்',
     'error': 'பிழை',
+    'success': 'Success',
     'tip': 'குறிப்பு',
     'confirm': 'சரி',
     'confirmDelete': 'நிச்சயமாக நீக்க விரும்புகிறீர்களா?',

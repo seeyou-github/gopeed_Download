@@ -2,6 +2,7 @@ const huHU = {
   'hu_HU': {
     'label': 'Magyar',
     'error': 'Hiba',
+    'success': 'Success',
     'tip': 'Tipp',
     'confirm': 'Megerősít',
     'confirmDelete': 'Biztosan törölni szeretné?',

@@ -2,6 +2,7 @@ const arAR = {
   'ar_AR': {
     'label': 'العربية',
     'error': 'خطأ',
+    'success': 'Success',
     'tip': 'تلميح',
     'confirm': 'تأكيد',
     'confirmDelete': 'هل أنت متأكد من الحذف؟',

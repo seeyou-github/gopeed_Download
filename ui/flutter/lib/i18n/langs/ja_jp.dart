@@ -2,6 +2,7 @@ const jaJP = {
   "ja_JP": {
     'label': '日本語',
     'error': 'エラー',
+    'success': 'Success',
     'tip': 'ヒント',
     'confirm': '確認',
     'confirmDelete': '削除してもよろしいですか？',

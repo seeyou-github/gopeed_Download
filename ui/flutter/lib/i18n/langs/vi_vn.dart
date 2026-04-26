@@ -2,6 +2,7 @@ const viVN = {
   'vi_VN': {
     'label': 'Tiếng Việt',
     'error': 'Lỗi',
+    'success': 'Success',
     'tip': 'Mẹo',
     'confirm': 'Xác nhận',
     'confirmDelete': 'Bạn có chắc chắn muốn xóa?',

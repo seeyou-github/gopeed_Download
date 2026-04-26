@@ -2,6 +2,7 @@ const frFR = {
   'fr_FR': {
     'label': 'Français',
     'error': 'Erreur',
+    'success': 'Success',
     'tip': 'Conseil',
     'confirm': 'Confirmer',
     'confirmDelete': 'Êtes-vous sûr de vouloir supprimer ?',

@@ -2,6 +2,7 @@ const ptBR = {
   'pt_BR': {
     'label': 'Português(Brasil)',
     'error': 'Erro',
+    'success': 'Success',
     'tip': 'Dica',
     'confirm': 'Confirmar',
     'confirmDelete': 'Tem certeza de que deseja excluir?',
