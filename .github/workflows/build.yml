@@ -99,7 +99,6 @@ jobs:
 
           go build -tags nosqlite -ldflags="-w -s -X github.com/GopeedLab/gopeed/pkg/base.Version=$env:VERSION" -buildmode=c-shared -o ui/flutter/windows/libgopeed.dll github.com/GopeedLab/gopeed/bind/desktop
           go build -ldflags="-w -s" -o ui/flutter/assets/exec/host.exe github.com/GopeedLab/gopeed/cmd/host
-          go build -ldflags="-w -s" -o ui/flutter/assets/exec/updater.exe github.com/GopeedLab/gopeed/cmd/updater
           cd ui/flutter
           $TAG = "v$env:VERSION"
           flutter build windows --dart-define="UPDATE_CHANNEL=windowsPortable" --dart-define="GA4_MEASUREMENT_ID=${{ env.GA4_MEASUREMENT_ID }}" --dart-define="GA4_API_SECRET=${{ env.GA4_API_SECRET }}"

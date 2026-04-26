@@ -52,6 +52,9 @@ final _channel =
 final _updaterBin = "updater${Util.isWindows() ? ".exe" : ""}";
 
 Future<void> installUpdater() async {
+  if (Util.isWindows()) {
+    return;
+  }
   await Util.installAsset(
       'assets/exec/$_updaterBin', await Util.homePathJoin(_updaterBin),
       executable: true);
@@ -342,6 +345,11 @@ Future<void> _update(String version, Function(int, int) onProgress) async {
   switch (_channel) {
     case Channel.windowsInstaller:
     case Channel.windowsPortable:
+      await launchUrl(
+          Uri.parse(
+              'https://github.com/GopeedLab/gopeed/releases/tag/v$version'),
+          mode: LaunchMode.externalApplication);
+      break;
     case Channel.macosDmg:
     case Channel.linuxFlathub:
     case Channel.linuxSnap:

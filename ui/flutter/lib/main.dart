@@ -160,10 +160,12 @@ Future<void> init(StartupArgs args) async {
         }
       }
 
-      try {
-        await installUpdater();
-      } catch (e) {
-        logger.e("updater install fail", e);
+      if (!Util.isWindows()) {
+        try {
+          await installUpdater();
+        } catch (e) {
+          logger.e("updater install fail", e);
+        }
       }
     }
   }();
