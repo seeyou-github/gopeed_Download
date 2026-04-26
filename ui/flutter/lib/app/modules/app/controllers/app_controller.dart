@@ -41,6 +41,7 @@ import '../../redirect/views/redirect_view.dart';
 import '../../../services/notification_service.dart';
 
 const unixSocketPath = 'gopeed.sock';
+const _foregroundExitButtonId = 'exit_app';
 
 const allTrackerSubscribeUrls = [
   'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt',
@@ -59,6 +60,30 @@ final allTrackerSubscribeUrlCdns = {
   for (var v in allTrackerSubscribeUrls)
     v: githubMirrorUrls(v, MirrorType.githubSource)
 };
+
+@pragma('vm:entry-point')
+void _foregroundTaskStartCallback() {
+  FlutterForegroundTask.setTaskHandler(_GopeedForegroundTaskHandler());
+}
+
+class _GopeedForegroundTaskHandler extends TaskHandler {
+  @override
+  Future<void> onStart(DateTime timestamp, TaskStarter starter) async {}
+
+  @override
+  void onRepeatEvent(DateTime timestamp) {}
+
+  @override
+  Future<void> onDestroy(DateTime timestamp) async {}
+
+  @override
+  void onNotificationButtonPressed(String id) {
+    FlutterForegroundTask.sendDataToMain({
+      'action': 'notification_button',
+      'id': id,
+    });
+  }
+}
 
 /// Represents a task that is pending URL update via listen mode.
 class PendingUpdateTask {
@@ -120,15 +145,33 @@ class AppController extends GetxController with WindowListener, TrayListener {
 
     _initCheckUpdate().onError((error, stackTrace) =>
         logger.w("initCheckUpdate error", error, stackTrace));
+
+    if (Util.isMobile()) {
+      FlutterForegroundTask.addTaskDataCallback(_onForegroundTaskData);
+    }
   }
 
   @override
   void onClose() {
     _linkSubscription?.cancel();
+    if (Util.isMobile()) {
+      FlutterForegroundTask.removeTaskDataCallback(_onForegroundTaskData);
+    }
     trayManager.removeListener(this);
     HostRpcService.instance.stop();
     WebViewRpcService.instance.stop();
     LibgopeedBoot.instance.stop();
+  }
+
+  void _onForegroundTaskData(Object data) {
+    if (data is! Map) {
+      return;
+    }
+    final action = data['action'];
+    final id = data['id'];
+    if (action == 'notification_button' && id == _foregroundExitButtonId) {
+      exitApp();
+    }
   }
 
   @override
@@ -331,6 +374,14 @@ class AppController extends GetxController with WindowListener, TrayListener {
     try {
       if (Util.isMobile() && await FlutterForegroundTask.isRunningService) {
         await FlutterForegroundTask.stopService();
+        if (Util.isAndroid()) {
+          for (var i = 0; i < 10; i++) {
+            if (!await FlutterForegroundTask.isRunningService) {
+              break;
+            }
+            await Future.delayed(const Duration(milliseconds: 100));
+          }
+        }
       }
     } catch (e, stackTrace) {
       logger.w("stop foreground task fail", e, stackTrace);
@@ -360,6 +411,8 @@ class AppController extends GetxController with WindowListener, TrayListener {
     }
 
     if (Util.isAndroid()) {
+      exit(0);
+    } else if (Util.isIOS()) {
       await SystemNavigator.pop();
     }
   }
@@ -438,6 +491,13 @@ class AppController extends GetxController with WindowListener, TrayListener {
           resPrefix: ResourcePrefix.ic,
           name: 'launcher',
         ),
+        notificationButtons: [
+          NotificationButton(
+            id: _foregroundExitButtonId,
+            text: 'exit'.tr,
+          ),
+        ],
+        callback: _foregroundTaskStartCallback,
       );
     }
   }
