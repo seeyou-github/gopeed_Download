@@ -91,6 +91,8 @@ dependency_overrides:
       url: https://github.com/monkeyWie/flutter-permission-handler.git
       ref: 35fc72c30262b9b49e1965b48a7524b44ba9daa7
       path: permission_handler_windows
+  share_handler_android:
+    path: third_party/share_handler_android
 dev_dependencies:
   flutter_test:
     sdk: flutter
