@@ -1,0 +1,124 @@
+name: manual-build-minimal
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to embed in build outputs, e.g. 1.9.3"
+        required: false
+        default: ""
+
+env:
+  GO_VERSION: "1.25"
+  FLUTTER_VERSION: "3.41.6"
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [[ -n "${{ github.event.inputs.version }}" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="manual-${GITHUB_RUN_NUMBER}-${GITHUB_SHA::7}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+  build-windows-x64:
+    runs-on: windows-2022
+    needs: [prepare]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable long paths
+        run: git config --global core.longpaths true
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Build Windows x64 portable zip
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          GOARCH: amd64
+        run: |
+          go build -tags nosqlite -ldflags="-w -s -X github.com/GopeedLab/gopeed/pkg/base.Version=$env:VERSION" -buildmode=c-shared -o ui/flutter/windows/libgopeed.dll github.com/GopeedLab/gopeed/bind/desktop
+          go build -ldflags="-w -s" -o ui/flutter/assets/exec/host.exe github.com/GopeedLab/gopeed/cmd/host
+          go build -ldflags="-w -s" -o ui/flutter/assets/exec/updater.exe github.com/GopeedLab/gopeed/cmd/updater
+          cd ui/flutter
+          $TAG = "v$env:VERSION"
+          flutter build windows --dart-define="UPDATE_CHANNEL=windowsPortable"
+          $release = "build\windows\x64\runner\Release\"
+          $mingw = "C:\Program Files\Git\mingw64\bin"
+          $system = "C:\Windows\System32"
+          cp $mingw\libstdc++-6.dll $release
+          cp $mingw\libgcc_s_seh-1.dll $release
+          cp $mingw\libwinpthread-1.dll $release
+          cp $system\msvcp140.dll $release
+          cp $system\vcruntime140.dll $release
+          cp $system\vcruntime140_1.dll $release
+          New-Item -Path build\windows\Output -ItemType Directory -Force | Out-Null
+          Compress-Archive -Path "$release*" -DestinationPath "build\windows\Output\Gopeed-$TAG-windows-amd64-portable.zip" -Force
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gopeed-windows-amd64-portable
+          path: ui/flutter/build/windows/Output/Gopeed-*-windows-amd64-portable.zip
+
+  build-android-arm64-v8a:
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Build Android arm64-v8a apk
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          APK_KEYSTORE: ${{ secrets.APK_KEYSTORE }}
+          APK_KEY_PASSWORD: ${{ secrets.APK_KEY_PASSWORD }}
+          APK_STORE_PASSWORD: ${{ secrets.APK_STORE_PASSWORD }}
+        shell: bash
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          go get golang.org/x/mobile/bind
+          gomobile init
+          gomobile bind -tags nosqlite -ldflags="-w -s -checklinkname=0 -X github.com/GopeedLab/gopeed/pkg/base.Version=$VERSION" -o ui/flutter/android/app/libs/libgopeed.aar -target=android -androidapi 21 -javapkg=com.gopeed github.com/GopeedLab/gopeed/bind/mobile
+          cd ui/flutter
+          echo "$APK_KEYSTORE" | base64 -di > android/app/upload-keystore.jks
+          flutter build apk --split-per-abi --dart-define="UPDATE_CHANNEL=androidApk"
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk dist/Gopeed-v$VERSION-android-arm64-v8a.apk
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gopeed-android-arm64-v8a
+          path: ui/flutter/dist/Gopeed-*-android-arm64-v8a.apk
