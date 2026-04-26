@@ -1,11 +1,14 @@
 package com.gopeed.gopeed
 
+import android.content.Intent
 import androidx.annotation.NonNull
 import com.gopeed.libgopeed.Libgopeed
+import com.pravera.flutter_foreground_task.service.ForegroundService
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.StandardMethodCodec
+import kotlin.system.exitProcess
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "gopeed.com/libgopeed"
@@ -39,6 +42,21 @@ class MainActivity : FlutterActivity() {
                 }
             }
         }
+    }
+
+    override fun onBackPressed() {
+        try {
+            stopService(Intent(this, ForegroundService::class.java))
+        } catch (_: Exception) {
+        }
+
+        try {
+            Libgopeed.stop()
+        } catch (_: Exception) {
+        }
+
+        finishAndRemoveTask()
+        exitProcess(0)
     }
 
 }

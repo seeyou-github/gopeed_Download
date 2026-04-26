@@ -15,7 +15,7 @@
     <application
         android:requestLegacyExternalStorage="true"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon"
         android:label="Go下载"
         android:extractNativeLibs="true">
         <activity
