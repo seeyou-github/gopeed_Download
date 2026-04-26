@@ -1,4 +1,4 @@
-name: manual-build-minimal
+name: build_android
 
 on:
   workflow_dispatch:
@@ -33,54 +33,6 @@ jobs:
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
-
-  build-windows-x64:
-    runs-on: windows-2022
-    needs: [prepare]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Enable long paths
-        run: git config --global core.longpaths true
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-
-      - name: Build Windows x64 portable zip
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-          GOARCH: amd64
-        run: |
-          $ErrorActionPreference = "Stop"
-          go build -tags nosqlite -ldflags="-w -s -X github.com/GopeedLab/gopeed/pkg/base.Version=$env:VERSION" -buildmode=c-shared -o ui/flutter/windows/libgopeed.dll github.com/GopeedLab/gopeed/bind/desktop
-          go build -ldflags="-w -s" -o ui/flutter/assets/exec/host.exe github.com/GopeedLab/gopeed/cmd/host
-          go build -ldflags="-w -s" -o ui/flutter/assets/exec/updater.exe github.com/GopeedLab/gopeed/cmd/updater
-          cd ui/flutter
-          $TAG = "v$env:VERSION"
-          flutter build windows --dart-define="UPDATE_CHANNEL=windowsPortable"
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $release = "build\windows\x64\runner\Release\"
-          $mingw = "C:\Program Files\Git\mingw64\bin"
-          $system = "C:\Windows\System32"
-          cp $mingw\libstdc++-6.dll $release
-          cp $mingw\libgcc_s_seh-1.dll $release
-          cp $mingw\libwinpthread-1.dll $release
-          cp $system\msvcp140.dll $release
-          cp $system\vcruntime140.dll $release
-          cp $system\vcruntime140_1.dll $release
-          New-Item -Path build\windows\Output -ItemType Directory -Force | Out-Null
-          Compress-Archive -Path "$release*" -DestinationPath "build\windows\Output\Gopeed-$TAG-windows-amd64-portable.zip" -Force
-
-      - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gopeed-windows-amd64-portable
-          path: ui/flutter/build/windows/Output/Gopeed-*-windows-amd64-portable.zip
 
   build-android-arm64-v8a:
     runs-on: ubuntu-latest
