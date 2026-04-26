@@ -17,6 +17,7 @@ const zhTW = {
     'setting': '設定',
     'donate': '捐款',
     'exit': '退出',
+    'pressBackAgainToExit': '再按一次返回鍵退出',
     'create': '建立任務',
     'directDownload': '直接下載',
     'advancedOptions': '進階選項',

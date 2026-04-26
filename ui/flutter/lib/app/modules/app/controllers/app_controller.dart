@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:get/get.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
@@ -86,6 +87,7 @@ class AppController extends GetxController with WindowListener, TrayListener {
 
   late AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
+  bool _isExiting = false;
 
   @override
   void onReady() {
@@ -308,12 +310,7 @@ class AppController extends GetxController with WindowListener, TrayListener {
       MenuItem(
         label: 'exit'.tr,
         onClick: (menuItem) async {
-          try {
-            await LibgopeedBoot.instance.stop();
-          } catch (e) {
-            logger.w("libgopeed stop fail", e);
-          }
-          windowManager.destroy();
+          await exitApp();
         },
       ),
     ]);
@@ -323,6 +320,48 @@ class AppController extends GetxController with WindowListener, TrayListener {
     }
     await trayManager.setContextMenu(menu);
     trayManager.addListener(this);
+  }
+
+  Future<void> exitApp() async {
+    if (_isExiting) {
+      return;
+    }
+    _isExiting = true;
+
+    try {
+      if (Util.isMobile() && await FlutterForegroundTask.isRunningService) {
+        await FlutterForegroundTask.stopService();
+      }
+    } catch (e, stackTrace) {
+      logger.w("stop foreground task fail", e, stackTrace);
+    }
+
+    try {
+      await LibgopeedBoot.instance.stop();
+    } catch (e, stackTrace) {
+      logger.w("libgopeed stop fail", e, stackTrace);
+    }
+
+    try {
+      await HostRpcService.instance.stop();
+    } catch (e, stackTrace) {
+      logger.w("host rpc stop fail", e, stackTrace);
+    }
+
+    try {
+      await WebViewRpcService.instance.stop();
+    } catch (e, stackTrace) {
+      logger.w("webview rpc stop fail", e, stackTrace);
+    }
+
+    if (Util.isDesktop()) {
+      await windowManager.destroy();
+      return;
+    }
+
+    if (Util.isAndroid()) {
+      await SystemNavigator.pop();
+    }
   }
 
   Future<void> _initRpcServer() async {

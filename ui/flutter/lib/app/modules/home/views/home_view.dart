@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../util/util.dart';
+import '../../app/controllers/app_controller.dart';
 import '../../../routes/app_pages.dart';
 import '../../../views/responsive_builder.dart';
 import '../controllers/home_controller.dart';
@@ -23,7 +25,7 @@ class HomeView extends GetView<HomeController> {
           break;
       }
 
-      return Scaffold(
+      final scaffold = Scaffold(
         // extendBody: true,
         body: Row(
             // crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,6 +158,43 @@ class HomeView extends GetView<HomeController> {
             //         },
             //       )
             : const SizedBox.shrink(),
+      );
+
+      if (!Util.isAndroid()) {
+        return scaffold;
+      }
+
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) {
+            return;
+          }
+
+          final currentPath = currentRoute?.uri.path ?? Routes.TASK;
+          if (currentPath != Routes.TASK &&
+              currentPath != Routes.EXTENSION &&
+              currentPath != Routes.SETTING) {
+            await Get.rootDelegate.popRoute();
+            return;
+          }
+
+          if (controller.shouldExitOnBack()) {
+            await Get.find<AppController>().exitApp();
+            return;
+          }
+
+          Get.closeCurrentSnackbar();
+          Get.rawSnackbar(
+            titleText: const SizedBox.shrink(),
+            messageText: Text('pressBackAgainToExit'.tr),
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(12),
+            borderRadius: 8,
+            duration: const Duration(seconds: 2),
+          );
+        },
+        child: scaffold,
       );
     });
   }

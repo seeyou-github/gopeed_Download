@@ -17,6 +17,7 @@ const enUS = {
     'setting': 'Settings',
     'donate': 'Donate',
     'exit': 'Exit',
+    'pressBackAgainToExit': 'Press back again to exit',
     'create': 'Create Task',
     'directDownload': 'Direct Download',
     'advancedOptions': 'Advanced Options',
