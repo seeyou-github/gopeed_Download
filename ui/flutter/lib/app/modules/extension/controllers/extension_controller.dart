@@ -4,6 +4,7 @@ import 'dart:collection';
 import 'package:get/get.dart';
 
 import '../../../../api/api.dart';
+import '../../../../api/gopeed_site_api.dart';
 import '../../../../api/model/extension.dart';
 import '../../../../api/model/install_extension.dart';
 import '../../../../api/model/store_extension.dart';

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
+
 import 'api.dart';
 import 'model/store_extension.dart';
 
