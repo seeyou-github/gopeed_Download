@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../../api/api.dart';
 import '../../../../util/updater.dart';
 
 class SettingController extends GetxController {
@@ -25,6 +26,16 @@ class SettingController extends GetxController {
 
   // fetch latest version
   void fetchLatestVersion() async {
+    try {
+      final config = await getConfig();
+      if (!config.extra.notifyWhenNewVersion) {
+        latestVersion.value = null;
+        return;
+      }
+    } catch (_) {
+      latestVersion.value = null;
+      return;
+    }
     latestVersion.value = await checkUpdate();
   }
 }

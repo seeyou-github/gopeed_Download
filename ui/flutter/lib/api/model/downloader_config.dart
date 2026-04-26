@@ -124,7 +124,7 @@ class ExtraConfig {
     this.lastDeleteTaskKeep = false,
     this.defaultDirectDownload = false,
     this.defaultBtClient = true,
-    this.notifyWhenNewVersion = true,
+    this.notifyWhenNewVersion = false,
     this.autoStartTasks = false,
     this.desktopNotification = true,
     this.downloadCategories = const [],

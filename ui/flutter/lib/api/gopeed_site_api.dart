@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:dio/dio.dart';
-
 import 'api.dart';
 import 'model/store_extension.dart';
 
@@ -32,15 +30,6 @@ class GopeedSiteApi {
       if (query != null && query.trim().isNotEmpty) 'q': query.trim(),
     });
     return StoreExtensionPage.fromJson(json as Map<String, dynamic>);
-  }
-
-  Future<void> reportExtensionInstall(String id) async {
-    final uri = Uri.https(_host, '/api/extensions/install');
-    await proxyRequest(
-      uri.toString(),
-      data: {'id': id},
-      options: Options(method: 'POST', contentType: Headers.jsonContentType),
-    );
   }
 
   Future<dynamic> _getJson(String path,

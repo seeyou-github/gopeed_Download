@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:get/get.dart';
-import 'package:gopeed/util/analytics.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -189,12 +188,4 @@ Future<void> onStart() async {
     });
   }
 
-  if (Config.isConfigured && Database.instance.getAnalyticsEnabled()) {
-    try {
-      await Analytics.instance.init();
-      await Analytics.instance.logAppOpen();
-    } catch (e) {
-      logger.w("GA4 init failed: $e");
-    }
-  }
 }

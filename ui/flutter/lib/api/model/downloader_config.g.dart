@@ -108,7 +108,7 @@ ExtraConfig _$ExtraConfigFromJson(Map<String, dynamic> json) => ExtraConfig(
       lastDeleteTaskKeep: json['lastDeleteTaskKeep'] as bool? ?? false,
       defaultDirectDownload: json['defaultDirectDownload'] as bool? ?? false,
       defaultBtClient: json['defaultBtClient'] as bool? ?? true,
-      notifyWhenNewVersion: json['notifyWhenNewVersion'] as bool? ?? true,
+      notifyWhenNewVersion: json['notifyWhenNewVersion'] as bool? ?? false,
       autoStartTasks: json['autoStartTasks'] as bool? ?? false,
       desktopNotification: json['desktopNotification'] as bool? ?? true,
       downloadCategories: (json['downloadCategories'] as List<dynamic>?)

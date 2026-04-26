@@ -4,7 +4,6 @@ import 'dart:collection';
 import 'package:get/get.dart';
 
 import '../../../../api/api.dart';
-import '../../../../api/gopeed_site_api.dart';
 import '../../../../api/model/extension.dart';
 import '../../../../api/model/install_extension.dart';
 import '../../../../api/model/store_extension.dart';
@@ -226,7 +225,6 @@ class ExtensionController extends GetxController {
       await loadInstalled(refreshUpdates: false);
       _backgroundCheckUpdate();
       _bumpStoreInstallCount(statsId);
-      _reportInstallSafe(statsId);
     });
   }
 
@@ -239,10 +237,8 @@ class ExtensionController extends GetxController {
       _backgroundCheckUpdate();
       if (installedId.isNotEmpty) {
         _bumpStoreInstallCount(installedId);
-        _reportInstallSafe(installedId);
       } else if (statsId != null && statsId.isNotEmpty) {
         _bumpStoreInstallCount(statsId);
-        _reportInstallSafe(statsId);
       }
     });
   }
@@ -269,7 +265,6 @@ class ExtensionController extends GetxController {
       await loadInstalled(refreshUpdates: false);
       _backgroundCheckUpdate();
       _bumpStoreInstallCount(extension.identity);
-      _reportInstallSafe(extension.identity);
     });
   }
 
@@ -321,16 +316,6 @@ class ExtensionController extends GetxController {
 
   void _backgroundCheckUpdate() {
     unawaited(checkUpdate());
-  }
-
-  void _reportInstallSafe(String id) {
-    unawaited(() async {
-      try {
-        await GopeedSiteApi.instance.reportExtensionInstall(id);
-      } catch (_) {
-        // Ignore stats reporting failures.
-      }
-    }());
   }
 
   void _bumpStoreInstallCount(String id) {
