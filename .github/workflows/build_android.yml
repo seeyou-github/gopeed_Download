@@ -56,17 +56,9 @@ jobs:
       - name: Build Android arm64-v8a apk
         env:
           VERSION: ${{ needs.prepare.outputs.version }}
-          ANDROID_DEBUG_KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -z "${ANDROID_DEBUG_KEYSTORE_BASE64:-}" ]]; then
-            echo "Missing required secret: ANDROID_DEBUG_KEYSTORE_BASE64" >&2
-            exit 1
-          fi
-          mkdir -p "$HOME/.android"
-          printf '%s' "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > "$HOME/.android/debug.keystore"
-          chmod 600 "$HOME/.android/debug.keystore"
           go install golang.org/x/mobile/cmd/gomobile@latest
           go get golang.org/x/mobile/bind
           gomobile init

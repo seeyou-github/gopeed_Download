@@ -52,9 +52,18 @@ android {
         versionName flutterVersionName
     }
 
+    signingConfigs {
+        release {
+            storeFile rootProject.file('../TestKey.jks')
+            storePassword '123321'
+            keyAlias 'Test'
+            keyPassword '123321'
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 
