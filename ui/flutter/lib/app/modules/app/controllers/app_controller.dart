@@ -22,6 +22,7 @@ import '../../../../api/model/create_task.dart';
 import '../../../../api/model/downloader_config.dart';
 import '../../../../api/model/install_extension.dart';
 import '../../../../api/model/request.dart';
+import '../../../../api/model/task.dart';
 import '../../../../core/common/start_config.dart';
 import '../../../../core/libgopeed_boot.dart';
 import '../../../../database/database.dart';
@@ -58,7 +59,7 @@ const allTrackerSubscribeUrls = [
 ];
 final allTrackerSubscribeUrlCdns = {
   for (var v in allTrackerSubscribeUrls)
-    v: githubMirrorUrls(v, MirrorType.githubSource)
+    v: githubMirrorUrls(v, MirrorType.githubSource),
 };
 
 @pragma('vm:entry-point')
@@ -119,33 +120,45 @@ class AppController extends GetxController with WindowListener, TrayListener {
   void onReady() {
     super.onReady();
 
-    _initDeepLinks().onError((error, stackTrace) =>
-        logger.w("initDeepLinks error", error, stackTrace));
+    _initDeepLinks().onError(
+      (error, stackTrace) => logger.w("initDeepLinks error", error, stackTrace),
+    );
 
-    _initWindows().onError((error, stackTrace) =>
-        logger.w("initWindows error", error, stackTrace));
+    _initWindows().onError(
+      (error, stackTrace) => logger.w("initWindows error", error, stackTrace),
+    );
 
     if (Util.isDesktop()) {
       Get.put(NotificationService());
     }
 
     _initTray().onError(
-        (error, stackTrace) => logger.w("initTray error", error, stackTrace));
+      (error, stackTrace) => logger.w("initTray error", error, stackTrace),
+    );
 
-    _initRpcServer().onError((error, stackTrace) =>
-        logger.w("initRpcServer error", error, stackTrace));
+    _initRpcServer().onError(
+      (error, stackTrace) => logger.w("initRpcServer error", error, stackTrace),
+    );
 
-    _initForegroundTask().onError((error, stackTrace) =>
-        logger.w("initForegroundTask error", error, stackTrace));
+    _initForegroundTask().onError(
+      (error, stackTrace) =>
+          logger.w("initForegroundTask error", error, stackTrace),
+    );
 
-    _initTrackerUpdate().onError((error, stackTrace) =>
-        logger.w("initTrackerUpdate error", error, stackTrace));
+    _initTrackerUpdate().onError(
+      (error, stackTrace) =>
+          logger.w("initTrackerUpdate error", error, stackTrace),
+    );
 
-    _initLaunchAtStartup().onError((error, stackTrace) =>
-        logger.w("initLaunchAtStartup error", error, stackTrace));
+    _initLaunchAtStartup().onError(
+      (error, stackTrace) =>
+          logger.w("initLaunchAtStartup error", error, stackTrace),
+    );
 
-    _initCheckUpdate().onError((error, stackTrace) =>
-        logger.w("initCheckUpdate error", error, stackTrace));
+    _initCheckUpdate().onError(
+      (error, stackTrace) =>
+          logger.w("initCheckUpdate error", error, stackTrace),
+    );
 
     if (Util.isMobile()) {
       FlutterForegroundTask.addTaskDataCallback(_onForegroundTaskData);
@@ -218,7 +231,8 @@ class AppController extends GetxController with WindowListener, TrayListener {
   final _windowsResizeSave = Util.debounce(() async {
     final size = await windowManager.getSize();
     Database.instance.saveWindowState(
-        WindowStateEntity(width: size.width, height: size.height));
+      WindowStateEntity(width: size.width, height: size.height),
+    );
   }, 500);
 
   @override
@@ -305,63 +319,65 @@ class AppController extends GetxController with WindowListener, TrayListener {
     if (Util.isWindows()) {
       await trayManager.setIcon('assets/tray_icon/icon.ico');
     } else if (Util.isMacos()) {
-      await trayManager.setIcon('assets/tray_icon/icon_mac.png',
-          isTemplate: true);
+      await trayManager.setIcon(
+        'assets/tray_icon/icon_mac.png',
+        isTemplate: true,
+      );
     } else if (Platform.environment.containsKey('FLATPAK_ID') ||
         Platform.environment.containsKey('SNAP')) {
       await trayManager.setIcon('com.gopeed.Gopeed');
     } else {
       await trayManager.setIcon('assets/tray_icon/icon.png');
     }
-    final menu = Menu(items: [
-      MenuItem(
-        label: "show".tr,
-        onClick: (menuItem) async => {
-          await windowManager.show(),
-        },
-      ),
-      MenuItem.separator(),
-      MenuItem(
-        label: "create".tr,
-        onClick: (menuItem) async => {
-          await windowManager.show(),
-          await Get.rootDelegate.offAndToNamed(Routes.CREATE),
-        },
-      ),
-      MenuItem(
-        label: "startAll".tr,
-        onClick: (menuItem) async => {continueAllTasks(null)},
-      ),
-      MenuItem(
-        label: "pauseAll".tr,
-        onClick: (menuItem) async => {pauseAllTasks(null)},
-      ),
-      MenuItem(
-        label: 'setting'.tr,
-        onClick: (menuItem) async => {
-          await windowManager.show(),
-          await Get.rootDelegate.offAndToNamed(Routes.SETTING),
-        },
-      ),
-      MenuItem.separator(),
-      MenuItem(
-        label: 'donate'.tr,
-        onClick: (menuItem) => {
-          launchUrl(Uri.parse("https://gopeed.com/docs/donate"),
-              mode: LaunchMode.externalApplication)
-        },
-      ),
-      MenuItem(
-        label: '${"version".tr}（${packageInfo.version}）',
-      ),
-      MenuItem.separator(),
-      MenuItem(
-        label: 'exit'.tr,
-        onClick: (menuItem) async {
-          await exitApp();
-        },
-      ),
-    ]);
+    final menu = Menu(
+      items: [
+        MenuItem(
+          label: "show".tr,
+          onClick: (menuItem) async => {await windowManager.show()},
+        ),
+        MenuItem.separator(),
+        MenuItem(
+          label: "create".tr,
+          onClick: (menuItem) async => {
+            await windowManager.show(),
+            await Get.rootDelegate.offAndToNamed(Routes.CREATE),
+          },
+        ),
+        MenuItem(
+          label: "startAll".tr,
+          onClick: (menuItem) async => {continueAllTasks(null)},
+        ),
+        MenuItem(
+          label: "pauseAll".tr,
+          onClick: (menuItem) async => {pauseAllTasks(null)},
+        ),
+        MenuItem(
+          label: 'setting'.tr,
+          onClick: (menuItem) async => {
+            await windowManager.show(),
+            await Get.rootDelegate.offAndToNamed(Routes.SETTING),
+          },
+        ),
+        MenuItem.separator(),
+        MenuItem(
+          label: 'donate'.tr,
+          onClick: (menuItem) => {
+            launchUrl(
+              Uri.parse("https://gopeed.com/docs/donate"),
+              mode: LaunchMode.externalApplication,
+            ),
+          },
+        ),
+        MenuItem(label: '${"version".tr}（${packageInfo.version}）'),
+        MenuItem.separator(),
+        MenuItem(
+          label: 'exit'.tr,
+          onClick: (menuItem) async {
+            await exitApp();
+          },
+        ),
+      ],
+    );
     if (!Util.isLinux()) {
       // Linux seems not support setToolTip, refer to: https://github.com/GopeedLab/gopeed/issues/241
       await trayManager.setToolTip('Gopeed');
@@ -455,18 +471,25 @@ class AppController extends GetxController with WindowListener, TrayListener {
             logger.w("create task from extension fail", e, StackTrace.current);
           }
         },
-        onForward: ({
-          required String path,
-          required String method,
-          data,
-          Map<String, dynamic>? query,
-        }) {
-          return forward(
-            path,
-            method: method,
-            data: data,
-            queryParameters: query,
-          );
+        onForward:
+            ({
+              required String path,
+              required String method,
+              data,
+              Map<String, dynamic>? query,
+            }) {
+              return forward(
+                path,
+                method: method,
+                data: data,
+                queryParameters: query,
+              );
+            },
+        onExitIfIdle: () async {
+          if (await _hasActiveDownloads()) {
+            return;
+          }
+          unawaited(exitApp());
         },
       );
     } catch (e) {
@@ -512,10 +535,7 @@ class AppController extends GetxController with WindowListener, TrayListener {
           name: 'launcher',
         ),
         notificationButtons: [
-          NotificationButton(
-            id: _foregroundExitButtonId,
-            text: 'exit'.tr,
-          ),
+          NotificationButton(id: _foregroundExitButtonId, text: 'exit'.tr),
         ],
         callback: _foregroundTaskStartCallback,
       );
@@ -554,14 +574,19 @@ class AppController extends GetxController with WindowListener, TrayListener {
         uri.scheme == "https") {
       path = uri.toString();
     } else if (uri.scheme == "file") {
-      path =
-          Util.isWindows() ? Uri.decodeFull(uri.path.substring(1)) : uri.path;
+      path = Util.isWindows()
+          ? Uri.decodeFull(uri.path.substring(1))
+          : uri.path;
     } else {
       path = (await toFile(uri.toString())).path;
     }
-    Get.rootDelegate.offAndToNamed(Routes.REDIRECT,
-        arguments: RedirectArgs(Routes.CREATE,
-            arguments: CreateTask(req: Request(url: path))));
+    Get.rootDelegate.offAndToNamed(
+      Routes.REDIRECT,
+      arguments: RedirectArgs(
+        Routes.CREATE,
+        arguments: CreateTask(req: Request(url: path)),
+      ),
+    );
   }
 
   String runningAddress() {
@@ -618,8 +643,9 @@ class AppController extends GetxController with WindowListener, TrayListener {
         continue;
       }
       try {
-        final trackers =
-            await Util.anyOk(cdns.map((cdn) => _fetchTrackers(cdn)));
+        final trackers = await Util.anyOk(
+          cdns.map((cdn) => _fetchTrackers(cdn)),
+        );
         result.addAll(trackers);
       } catch (e) {
         logger.w("subscribe trackers fail, url: $u", e);
@@ -665,7 +691,8 @@ class AppController extends GetxController with WindowListener, TrayListener {
     final resp = await proxyRequest(subscribeUrl);
     if (resp.statusCode != 200) {
       throw Exception(
-          'Failed to get trackers, status code: ${resp.statusCode}');
+        'Failed to get trackers, status code: ${resp.statusCode}',
+      );
     }
     if (resp.data == null || resp.data!.isEmpty) {
       throw Exception('Failed to get trackers, data is null');
@@ -700,7 +727,8 @@ class AppController extends GetxController with WindowListener, TrayListener {
       if (Util.isDesktop()) {
         config.downloadDir = (await getDownloadsDirectory())?.path ?? "./";
       } else if (Util.isAndroid()) {
-        config.downloadDir = (await getExternalStorageDirectory())?.path ??
+        config.downloadDir =
+            (await getExternalStorageDirectory())?.path ??
             (await getApplicationDocumentsDirectory()).path;
       } else if (Util.isIOS()) {
         config.downloadDir = (await getApplicationDocumentsDirectory()).path;
@@ -777,9 +805,10 @@ class AppController extends GetxController with WindowListener, TrayListener {
       return;
     }
     launchAtStartup.setup(
-        appName: packageInfo.appName,
-        appPath: Platform.resolvedExecutable,
-        args: ['--${StartupArgs.flagHidden}']);
+      appName: packageInfo.appName,
+      appPath: Platform.resolvedExecutable,
+      args: ['--${StartupArgs.flagHidden}'],
+    );
     autoStartup.value = await launchAtStartup.isEnabled();
   }
 
@@ -796,17 +825,21 @@ class AppController extends GetxController with WindowListener, TrayListener {
   }
 
   Future<void> saveConfig() async {
-    Database.instance.saveStartConfig(StartConfigEntity(
+    Database.instance.saveStartConfig(
+      StartConfigEntity(
         network: startConfig.value.network,
         address: startConfig.value.address,
-        apiToken: startConfig.value.apiToken));
+        apiToken: startConfig.value.apiToken,
+      ),
+    );
     await putConfig(downloaderConfig.value);
   }
 
   Map<String, dynamic> _decodeParams(String params) {
     final safeParams = params.replaceAll('"', "").replaceAll(" ", "+");
-    final paramsJson =
-        String.fromCharCodes(base64Decode(base64.normalize(safeParams)));
+    final paramsJson = String.fromCharCodes(
+      base64Decode(base64.normalize(safeParams)),
+    );
     return jsonDecode(paramsJson);
   }
 
@@ -816,13 +849,27 @@ class AppController extends GetxController with WindowListener, TrayListener {
   }
 
   _handleToCreate0(CreateTask createTaskParams) {
-    Get.rootDelegate.offAndToNamed(Routes.REDIRECT,
-        arguments: RedirectArgs(Routes.CREATE, arguments: createTaskParams));
+    Get.rootDelegate.offAndToNamed(
+      Routes.REDIRECT,
+      arguments: RedirectArgs(Routes.CREATE, arguments: createTaskParams),
+    );
   }
 
   _handleToExtension(String params) {
     final installExtension = InstallExtension.fromJson(_decodeParams(params));
-    Get.rootDelegate.offAndToNamed(Routes.REDIRECT,
-        arguments: RedirectArgs(Routes.EXTENSION, arguments: installExtension));
+    Get.rootDelegate.offAndToNamed(
+      Routes.REDIRECT,
+      arguments: RedirectArgs(Routes.EXTENSION, arguments: installExtension),
+    );
+  }
+
+  Future<bool> _hasActiveDownloads() async {
+    try {
+      final tasks = await getTasks([Status.ready, Status.running, Status.wait]);
+      return tasks.isNotEmpty;
+    } catch (e, stackTrace) {
+      logger.w("check active downloads fail", e, stackTrace);
+      return false;
+    }
   }
 }

@@ -124,13 +124,26 @@ func hasActiveDownloads() (bool, error) {
 	return len(tasks) > 0, nil
 }
 
+func requestExitIfIdle() {
+	body := []byte("{}")
+	resp, err := postToFlutter("/exit_if_idle", body, nil, 5*time.Second)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+}
+
 func waitForDownloadsToIdle() {
 	if !launchedApp {
 		return
 	}
 	for {
 		active, err := hasActiveDownloads()
-		if err != nil || !active {
+		if err != nil {
+			return
+		}
+		if !active {
+			requestExitIfIdle()
 			return
 		}
 		time.Sleep(15 * time.Second)

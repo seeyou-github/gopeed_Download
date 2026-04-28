@@ -6,17 +6,18 @@ import '../../api/model/create_task.dart';
 import '../../api/model/result.dart';
 import 'server.dart';
 
-typedef HostCreateHandler = Future<void> Function(
-  CreateTask createTask,
-  bool silent,
-);
+typedef HostCreateHandler =
+    Future<void> Function(CreateTask createTask, bool silent);
 
-typedef HostForwardHandler = Future<dynamic> Function({
-  required String path,
-  required String method,
-  dynamic data,
-  Map<String, dynamic>? query,
-});
+typedef HostForwardHandler =
+    Future<dynamic> Function({
+      required String path,
+      required String method,
+      dynamic data,
+      Map<String, dynamic>? query,
+    });
+
+typedef HostExitIfIdleHandler = Future<void> Function();
 
 class HostRpcService {
   HostRpcService._();
@@ -28,6 +29,7 @@ class HostRpcService {
   Future<void> start({
     required HostCreateHandler onCreate,
     required HostForwardHandler onForward,
+    required HostExitIfIdleHandler onExitIfIdle,
   }) async {
     if (_server != null) {
       return;
@@ -69,6 +71,10 @@ class HostRpcService {
             }
           }
         },
+        '/exit_if_idle': (ctx) async {
+          await onExitIfIdle();
+          await ctx.writeJSON(Result(code: 0).toJson());
+        },
       },
     );
   }
@@ -83,8 +89,9 @@ class HostRpcService {
 
   Map<String, dynamic> _decodeParams(String params) {
     final safeParams = params.replaceAll('"', '').replaceAll(' ', '+');
-    final paramsJson =
-        String.fromCharCodes(base64Decode(base64.normalize(safeParams)));
+    final paramsJson = String.fromCharCodes(
+      base64Decode(base64.normalize(safeParams)),
+    );
     return jsonDecode(paramsJson);
   }
 }
