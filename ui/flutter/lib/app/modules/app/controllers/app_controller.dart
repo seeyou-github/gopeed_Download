@@ -113,6 +113,7 @@ class AppController extends GetxController with WindowListener, TrayListener {
   late AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
   bool _isExiting = false;
+  bool _isTrayDestroyed = false;
 
   @override
   void onReady() {
@@ -158,6 +159,9 @@ class AppController extends GetxController with WindowListener, TrayListener {
       FlutterForegroundTask.removeTaskDataCallback(_onForegroundTaskData);
     }
     trayManager.removeListener(this);
+    if (Util.isDesktop()) {
+      unawaited(_destroyTray());
+    }
     HostRpcService.instance.stop();
     WebViewRpcService.instance.stop();
     LibgopeedBoot.instance.stop();
@@ -297,6 +301,7 @@ class AppController extends GetxController with WindowListener, TrayListener {
     if (!Util.isDesktop()) {
       return;
     }
+    _isTrayDestroyed = false;
     if (Util.isWindows()) {
       await trayManager.setIcon('assets/tray_icon/icon.ico');
     } else if (Util.isMacos()) {
@@ -371,6 +376,8 @@ class AppController extends GetxController with WindowListener, TrayListener {
     }
     _isExiting = true;
 
+    await _destroyTray();
+
     try {
       if (Util.isMobile() && await FlutterForegroundTask.isRunningService) {
         await FlutterForegroundTask.stopService();
@@ -414,6 +421,19 @@ class AppController extends GetxController with WindowListener, TrayListener {
       exit(0);
     } else if (Util.isIOS()) {
       await SystemNavigator.pop();
+    }
+  }
+
+  Future<void> _destroyTray() async {
+    if (!Util.isDesktop() || _isTrayDestroyed) {
+      return;
+    }
+    _isTrayDestroyed = true;
+    trayManager.removeListener(this);
+    try {
+      await trayManager.destroy();
+    } catch (e, stackTrace) {
+      logger.w("destroy tray fail", e, stackTrace);
     }
   }
 

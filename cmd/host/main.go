@@ -12,8 +12,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/pkg/browser"
 )
 
 type Message struct {
@@ -27,6 +25,8 @@ type Response struct {
 	Data    any    `json:"data,omitempty"`
 	Message string `json:"message,omitempty"`
 }
+
+var launchedApp bool
 
 func check() (data bool, err error) {
 	conn, err := Dial()
@@ -47,9 +47,10 @@ func wakeup(hidden bool) error {
 	if hidden {
 		uri = uri + "?hidden=true"
 	}
-	if err := browser.OpenURL(uri); err != nil {
+	if err := openURL(uri); err != nil {
 		return err
 	}
+	launchedApp = true
 
 	for i := 0; i < 10; i++ {
 		if ok, _ := check(); ok {
@@ -79,6 +80,61 @@ func postToFlutter(path string, body []byte, headers map[string]string, timeout 
 		req.Header.Set(k, v)
 	}
 	return client.Do(req)
+}
+
+func hasActiveDownloads() (bool, error) {
+	body, err := json.Marshal(map[string]any{
+		"method": "GET",
+		"path":   "/api/v1/tasks?status=ready&status=running&status=wait",
+	})
+	if err != nil {
+		return false, err
+	}
+
+	resp, err := postToFlutter("/forward", body, nil, 5*time.Second)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return false, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+
+	var result struct {
+		Code int             `json:"code"`
+		Data json.RawMessage `json:"data"`
+	}
+	if err := json.Unmarshal(respBody, &result); err != nil {
+		return false, err
+	}
+	if result.Code != 0 || len(result.Data) == 0 || string(result.Data) == "null" {
+		return false, nil
+	}
+
+	var tasks []json.RawMessage
+	if err := json.Unmarshal(result.Data, &tasks); err != nil {
+		return false, err
+	}
+	return len(tasks) > 0, nil
+}
+
+func waitForDownloadsToIdle() {
+	if !launchedApp {
+		return
+	}
+	for {
+		active, err := hasActiveDownloads()
+		if err != nil || !active {
+			return
+		}
+		time.Sleep(15 * time.Second)
+	}
 }
 
 var apiMap = map[string]func(message *Message) (data any, err error){
@@ -148,7 +204,8 @@ func main() {
 		// Read message length (first 4 bytes)
 		var length uint32
 		if err := binary.Read(os.Stdin, binary.NativeEndian, &length); err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
+				waitForDownloadsToIdle()
 				return
 			}
 			sendError("Failed to read message length: " + err.Error())
@@ -158,6 +215,10 @@ func main() {
 		// Read the message
 		input := make([]byte, length)
 		if _, err := io.ReadFull(os.Stdin, input); err != nil {
+			if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
+				waitForDownloadsToIdle()
+				return
+			}
 			sendError("Failed to read message: " + err.Error())
 			return
 		}
